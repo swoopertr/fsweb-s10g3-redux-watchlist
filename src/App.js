@@ -1,14 +1,27 @@
 import { useState } from "react";
-import { Switch, Route, NavLink } from "react-router-dom";
+import { Switch, Route, NavLink, useHistory } from "react-router-dom";
 import Movie from "./components/Movie";
 import FavMovie from "./components/FavMovie";
+import { useSelector, useDispatch } from "react-redux";
+import { addListAction, nextMovieAction } from "./ActionsforRedux";
+
 
 function App() {
-  const [sira, setSira] = useState(0);
-  const favMovies = [];
+ // const [sira, setSira] = useState(0);
+  const favMovies = useSelector(store=> store.favMovies); //bu movie'lerin id'lerini dönen bir array
+  const defaultMovies = useSelector(store=> store.defaultMovies)
+  const {push} = useHistory(); //ihtiyaç olabilir
+
+ const currentMovieId = useSelector(store=> store.currentMovieId); //egemenlerden gelecek
+ const dispatcher = useDispatch();
 
   function sonrakiFilm() {
-    setSira(sira + 1);
+   dispatcher(nextMovieAction());
+  }
+
+  function addToMyList(){
+    dispatcher(addListAction(currentMovieId));
+
   }
 
   return (
@@ -23,7 +36,7 @@ function App() {
       </nav>
       <Switch>
         <Route exact path="/">
-          <Movie sira={sira} />
+          <Movie sira={currentMovieId} /> 
 
           <div className="flex gap-3 justify-end py-3">
             <button
@@ -32,7 +45,7 @@ function App() {
             >
               Sıradaki
             </button>
-            <button className="select-none px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white">
+            <button onClick={addToMyList} className="select-none px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white">
               Listeme ekle
             </button>
           </div>
@@ -40,9 +53,21 @@ function App() {
 
         <Route path="/listem">
           <div>
-            {favMovies.map((movie) => (
-              <FavMovie key={movie.id} title={movie.title} id={movie.id} />
-            ))}
+            
+         {/*    {favMovies.map((favId) => {
+              const foundedMovie = defaultMovies.find(movie => movie.id === favId);
+              return <FavMovie 
+                key={foundedMovie.id} 
+                title={foundedMovie.title} 
+                id={foundedMovie.id} 
+              />
+            })} */}
+            
+            {defaultMovies.filter(item=> favMovies.includes(item.id)).map((movie) => 
+               <FavMovie key={movie.id} title={movie.title} id={movie.id} />
+            )}
+
+
           </div>
         </Route>
       </Switch>
