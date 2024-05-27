@@ -1,28 +1,31 @@
-import { useState } from "react";
-import { Switch, Route, NavLink, useHistory } from "react-router-dom";
+import { useEffect } from "react";
+import { Switch, Route, NavLink } from "react-router-dom";
 import Movie from "./components/Movie";
 import FavMovie from "./components/FavMovie";
 import { useSelector, useDispatch } from "react-redux";
 import { addListAction, nextMovieAction } from "./ActionsforRedux";
-
+import { getProductsActionCreator } from "./ActionsforRedux/actionCreatorForRedux";
+import { getMoviesActionCreator } from "./ActionsforRedux/moviesActionCreator";
 
 function App() {
- // const [sira, setSira] = useState(0);
-  const favMovies = useSelector(store=> store.favMovies); //bu movie'lerin id'lerini dönen bir array
-  const defaultMovies = useSelector(store=> store.defaultMovies)
-  const {push} = useHistory(); //ihtiyaç olabilir
+  const favMovies = useSelector(store => store.favMovies); //bu movie'lerin id'lerini dönen bir array
+  const defaultMovies = useSelector(store => store.defaultMovies)
 
- const currentMovieId = useSelector(store=> store.currentMovieId); //egemenlerden gelecek
- const dispatcher = useDispatch();
+  const currentMovieId = useSelector(store => store.currentMovieId); //egemenlerden gelecek
+  const dispatcher = useDispatch();
 
   function sonrakiFilm() {
-   dispatcher(nextMovieAction());
+    dispatcher(nextMovieAction());
   }
 
-  function addToMyList(){
+  function addToMyList() {
     dispatcher(addListAction(currentMovieId));
-
   }
+
+  useEffect(() => {
+    dispatcher(getProductsActionCreator());
+    dispatcher(getMoviesActionCreator());
+  }, []);
 
   return (
     <div className="wrapper max-w-2xl mx-auto">
@@ -36,7 +39,7 @@ function App() {
       </nav>
       <Switch>
         <Route exact path="/">
-          <Movie sira={currentMovieId} /> 
+          <Movie sira={currentMovieId} />
 
           <div className="flex gap-3 justify-end py-3">
             <button
@@ -53,8 +56,8 @@ function App() {
 
         <Route path="/listem">
           <div>
-            
-         {/*    {favMovies.map((favId) => {
+
+            {/*    {favMovies.map((favId) => {
               const foundedMovie = defaultMovies.find(movie => movie.id === favId);
               return <FavMovie 
                 key={foundedMovie.id} 
@@ -62,11 +65,10 @@ function App() {
                 id={foundedMovie.id} 
               />
             })} */}
-            
-            {defaultMovies.filter(item=> favMovies.includes(item.id)).map((movie) => 
-               <FavMovie key={movie.id} title={movie.title} id={movie.id} />
-            )}
 
+            { defaultMovies.length && defaultMovies.filter(item => favMovies.includes(item.id)).map((movie) =>
+              <FavMovie key={movie.id} title={movie.title} id={movie.id} />
+            )}
 
           </div>
         </Route>
